@@ -1,0 +1,24 @@
+.card {
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.list li {
+  margin-bottom: 0.25rem;
+}
+

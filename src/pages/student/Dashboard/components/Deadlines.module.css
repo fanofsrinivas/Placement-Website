@@ -1,0 +1,54 @@
+.card {
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(234, 179, 8, 0.9);
+  background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.18), rgba(15, 23, 42, 0.98));
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.45rem 0;
+}
+
+.date {
+  width: 52px;
+  border-radius: 0.9rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(248, 250, 252, 0.85);
+  font-size: 0.78rem;
+  text-align: center;
+  color: #e5e7eb;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.company {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.label {
+  font-size: 0.78rem;
+  color: #e5e7eb;
+}
+

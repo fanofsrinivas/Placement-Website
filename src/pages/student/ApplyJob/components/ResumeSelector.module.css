@@ -1,0 +1,37 @@
+.card {
+  margin-top: 0.8rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.title {
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.text {
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.options {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+input[type='radio'] {
+  accent-color: #22c55e;
+}
+

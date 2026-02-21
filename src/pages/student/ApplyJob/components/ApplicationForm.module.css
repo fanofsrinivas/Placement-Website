@@ -1,0 +1,61 @@
+.card {
+  margin-top: 0.8rem;
+  padding: 1.1rem 1.2rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem 1rem;
+}
+
+.field,
+.fullField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+label {
+  color: #e5e7eb;
+}
+
+input {
+  border-radius: 0.8rem;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  background: rgba(15, 23, 42, 0.9);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+  color: #f9fafb;
+}
+
+input:focus {
+  outline: none;
+  border-color: rgba(248, 250, 252, 0.85);
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.6);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fullField {
+    grid-column: auto;
+  }
+}
+

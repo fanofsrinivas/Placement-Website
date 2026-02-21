@@ -1,0 +1,41 @@
+.card {
+  margin-top: 0.8rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.title {
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.text {
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.textarea {
+  margin-top: 0.6rem;
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  background: rgba(15, 23, 42, 0.9);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.82rem;
+  color: #f9fafb;
+  resize: vertical;
+}
+
+.textarea::placeholder {
+  color: #6b7280;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: rgba(248, 250, 252, 0.85);
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.6);
+}
+

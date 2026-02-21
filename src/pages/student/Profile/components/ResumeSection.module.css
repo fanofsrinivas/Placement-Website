@@ -1,0 +1,58 @@
+.card {
+  padding: 1.1rem 1.2rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.header {
+  margin-bottom: 0.6rem;
+}
+
+.title {
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.content {
+  font-size: 0.82rem;
+}
+
+.text {
+  color: #9ca3af;
+}
+
+.primary {
+  margin-top: 0.6rem;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  border: none;
+  background: linear-gradient(to right, #22c55e, #16a34a);
+  color: #f9fafb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.list {
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.resumeName {
+  color: #e5e7eb;
+}
+
+.tag {
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.14);
+  color: #4ade80;
+  font-size: 0.72rem;
+}
+

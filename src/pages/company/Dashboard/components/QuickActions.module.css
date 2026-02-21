@@ -1,0 +1,41 @@
+.card {
+  padding: 1.1rem 1.2rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.actionPrimary,
+.action {
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.actionPrimary {
+  background: linear-gradient(to right, #22c55e, #16a34a);
+  color: #f9fafb;
+}
+
+.action {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  color: #e5e7eb;
+}
+

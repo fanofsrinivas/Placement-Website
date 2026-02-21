@@ -1,0 +1,51 @@
+.card {
+  padding: 1.1rem 1.1rem 1.2rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(96, 165, 250, 0.8);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.caption {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.progressTrack {
+  margin-top: 0.8rem;
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(30, 64, 175, 0.8);
+  overflow: hidden;
+}
+
+.progressFill {
+  width: 92%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(to right, #22c55e, #eab308);
+}
+
+.status {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #bbf7d0;
+}
+
+.list {
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+  font-size: 0.78rem;
+  color: #e5e7eb;
+}
+
+.list li {
+  margin-bottom: 0.15rem;
+}
+

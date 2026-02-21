@@ -1,0 +1,30 @@
+.section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  padding: 1.4rem 1.3rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.98));
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.text {
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
