@@ -1,12 +1,33 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import nitwLogo from '../../assets/nitw-logo.png'
 
 export default function Login() {
     const [active, setActive] = useState(false)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
+    const { login } = useAuth()
+    const navigate = useNavigate()
 
-    const handleSignIn = (e) => {
+    const handleSignIn = async (e) => {
         e.preventDefault()
-        console.log('Sign In submitted')
+        setError('')
+        setLoading(true)
+        try {
+            const user = await login(email, password)
+            if (user.role === 'student') {
+                navigate('/student-dashboard')
+            } else {
+                navigate('/company-dashboard')
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Login failed. Please try again.')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -18,24 +39,35 @@ export default function Login() {
 
                     {/* Sign In */}
                     <div className="login-form-panel login-sign-in">
+                        <img src={nitwLogo} alt="NIT Warangal" className="auth-logo" />
                         <h1>Sign In</h1>
                         <p className="subtitle">Welcome back to the Placement Portal</p>
+                        {error && <div className="alert alert--error"><span>{error}</span></div>}
                         <form onSubmit={handleSignIn}>
                             <div className="login-input-group">
-                                <input type="email" id="loginEmail" placeholder=" " required />
+                                <input
+                                    type="email" id="loginEmail" placeholder=" " required
+                                    value={email} onChange={(e) => setEmail(e.target.value)}
+                                />
                                 <label htmlFor="loginEmail">Email</label>
                             </div>
                             <div className="login-input-group">
-                                <input type="password" id="loginPassword" placeholder=" " required />
+                                <input
+                                    type="password" id="loginPassword" placeholder=" " required
+                                    value={password} onChange={(e) => setPassword(e.target.value)}
+                                />
                                 <label htmlFor="loginPassword">Password</label>
                             </div>
                             <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
-                            <button type="submit" className="btn btn-primary">Sign In</button>
+                            <button type="submit" className="btn btn-primary" disabled={loading}>
+                                {loading ? 'Signing in…' : 'Sign In'}
+                            </button>
                         </form>
                     </div>
 
                     {/* Register Choice Panel */}
                     <div className="login-form-panel login-sign-up">
+                        <img src={nitwLogo} alt="NIT Warangal" className="auth-logo" />
                         <h1>Join Us</h1>
                         <p className="subtitle">Choose your registration type to get started</p>
 

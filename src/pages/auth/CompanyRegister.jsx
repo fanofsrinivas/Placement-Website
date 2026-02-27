@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import nitwLogo from '../../assets/nitw-logo.png'
+import { useAuth } from '../../context/AuthContext'
 import PasswordStrength from '../../components/auth/PasswordStrength'
 import RegistrationSuccess from '../../components/auth/RegistrationSuccess'
 
 export default function CompanyRegister() {
     const [submitted, setSubmitted] = useState(false)
     const [errors, setErrors] = useState({})
+    const [apiError, setApiError] = useState('')
+    const [loading, setLoading] = useState(false)
+    const { registerCompany } = useAuth()
+    const navigate = useNavigate()
     const [data, setData] = useState({
         companyName: '', website: '', linkedin: '',
         hrName: '', hrEmail: '', hrPhone: '',
@@ -16,6 +22,7 @@ export default function CompanyRegister() {
     const handleChange = (field) => (e) => {
         setData(prev => ({ ...prev, [field]: e.target.value }))
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }))
+        if (apiError) setApiError('')
     }
 
     const validate = () => {
@@ -40,11 +47,22 @@ export default function CompanyRegister() {
         return Object.keys(errs).length === 0
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        if (validate()) {
-            console.log('Company Registration →', data)
+        if (!validate()) return
+
+        setLoading(true)
+        setApiError('')
+        try {
+            const { confirmPassword, ...payload } = data
+            await registerCompany(payload)
             setSubmitted(true)
+            // After 2 seconds, redirect to dashboard
+            setTimeout(() => navigate('/company-dashboard'), 2000)
+        } catch (err) {
+            setApiError(err.response?.data?.message || 'Registration failed. Please try again.')
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -53,8 +71,8 @@ export default function CompanyRegister() {
             <div className="auth-page">
                 <div className="auth-card">
                     <RegistrationSuccess
-                        message="Registration Submitted!"
-                        submessage="Your application is awaiting admin approval. You'll receive an email once your account is activated."
+                        message="Registration Successful!"
+                        submessage="Redirecting to your dashboard..."
                     />
                 </div>
             </div>
@@ -64,6 +82,7 @@ export default function CompanyRegister() {
     return (
         <div className="auth-page">
             <div className="auth-card auth-card--wide" style={{ maxWidth: 680 }}>
+                <img src={nitwLogo} alt="NIT Warangal" className="auth-logo" />
                 <h1>Company Registration</h1>
                 <p className="subtitle">Register as a corporate placement partner</p>
 
@@ -73,6 +92,12 @@ export default function CompanyRegister() {
                     </svg>
                     <span>Admin approval is required after registration. You will be notified via email once your account is verified.</span>
                 </div>
+
+                {apiError && (
+                    <div className="alert alert--error" style={{ marginBottom: 16 }}>
+                        <span>{apiError}</span>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit}>
                     {/* Company Info */}
@@ -187,7 +212,9 @@ export default function CompanyRegister() {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary">Submit Registration</button>
+                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                        {loading ? 'Submitting…' : 'Submit Registration'}
+                    </button>
                 </form>
 
                 <div className="auth-links">

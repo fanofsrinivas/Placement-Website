@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import nitwLogo from '../../assets/nitw-logo.png'
+import { useAuth } from '../../context/AuthContext'
 import RegistrationProgress from '../../components/auth/RegistrationProgress'
 import BasicInfoForm from '../../components/auth/BasicInfoForm'
 import AcademicsForm from '../../components/auth/AcademicsForm'
@@ -14,9 +16,39 @@ export default function StudentRegister() {
     const [formData, setFormData] = useState({
         basic: {}, academics: {}, credentials: {}
     })
+    const [regError, setRegError] = useState('')
+    const [regLoading, setRegLoading] = useState(false)
+    const { registerStudent } = useAuth()
+    const navigate = useNavigate()
 
     const updateData = (section) => (data) => {
         setFormData(prev => ({ ...prev, [section]: data }))
+    }
+
+    const handleFinalSubmit = async () => {
+        setRegError('')
+        setRegLoading(true)
+        try {
+            const payload = {
+                name: formData.basic.name,
+                rollNumber: formData.basic.rollNumber,
+                email: formData.basic.email,
+                mobile: formData.basic.mobile,
+                dob: formData.basic.dob,
+                degree: formData.academics.degree,
+                branch: formData.academics.branch,
+                password: formData.credentials.password,
+            }
+            await registerStudent(payload)
+            setStep(5)
+            // After 2 seconds, redirect to dashboard
+            setTimeout(() => navigate('/student-dashboard'), 2000)
+        } catch (err) {
+            setRegError(err.response?.data?.message || 'Registration failed. Please try again.')
+            setStep(3) // Go back to credentials step to show error
+        } finally {
+            setRegLoading(false)
+        }
     }
 
     const renderStep = () => {
@@ -51,7 +83,7 @@ export default function StudentRegister() {
                 return (
                     <OTPVerification
                         email={formData.basic.email}
-                        onVerify={() => setStep(5)}
+                        onVerify={handleFinalSubmit}
                         onBack={() => setStep(3)}
                     />
                 )
@@ -59,7 +91,7 @@ export default function StudentRegister() {
                 return (
                     <RegistrationSuccess
                         message="Registration Successful!"
-                        submessage="Please wait for verification by the admin team."
+                        submessage="Redirecting to your dashboard..."
                     />
                 )
             default:
@@ -72,13 +104,26 @@ export default function StudentRegister() {
             <div className="auth-card auth-card--wide">
                 {step <= 3 && (
                     <>
+                        <img src={nitwLogo} alt="NIT Warangal" className="auth-logo" />
                         <h1>Student Registration</h1>
                         <p className="subtitle">Step {step} of 3 — {STEPS[step - 1]}</p>
                         <RegistrationProgress currentStep={step} steps={STEPS} />
                     </>
                 )}
 
-                {renderStep()}
+                {regError && step <= 4 && (
+                    <div className="alert alert--error" style={{ marginBottom: 16 }}>
+                        <span>{regError}</span>
+                    </div>
+                )}
+
+                {regLoading && step === 4 && (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.7)' }}>
+                        Creating your account...
+                    </div>
+                )}
+
+                {!regLoading && renderStep()}
 
                 {step <= 3 && (
                     <div className="auth-links">

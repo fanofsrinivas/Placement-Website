@@ -11,8 +11,8 @@ export default function BasicInfoForm({ data, onChange, onNext }) {
         if (!data.name?.trim()) errs.name = 'Name is required'
         if (!data.rollNumber?.trim()) errs.rollNumber = 'Roll number is required'
         if (!data.email?.trim()) errs.email = 'Email is required'
-        else if (!/^[0-9]{2}[a-z]{3}[0-9][a-z][0-9]{2}@student\.nitw\.ac\.in$/i.test(data.email))
-            errs.email = 'Use your institute email (e.g. 24mab0a17@student.nitw.ac.in)'
+        else if (!/^[a-z]{2}[0-9]{2}[a-z]{3}[0-9][a-z][0-9]{2}@student\.nitw\.ac\.in$/i.test(data.email))
+            errs.email = 'Use your institute email (e.g. ms24mab0a17@student.nitw.ac.in)'
         if (!data.mobile?.trim()) errs.mobile = 'Mobile number is required'
         else if (!/^\d{10}$/.test(data.mobile)) errs.mobile = 'Enter a valid 10-digit number'
         if (!data.dob) errs.dob = 'Date of birth is required'
@@ -78,7 +78,7 @@ export default function BasicInfoForm({ data, onChange, onNext }) {
             <div className="form-group">
                 <label htmlFor="email">Email Address</label>
                 <input
-                    id="email" type="email" placeholder="24mab0a17@student.nitw.ac.in"
+                    id="email" type="email" placeholder="ms24mab0a17@student.nitw.ac.in"
                     value={data.email || ''} onChange={handleChange('email')}
                     className={errors.email ? 'error' : ''}
                 />

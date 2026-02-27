@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import nitwLogo from '../../assets/nitw-logo.png'
 import OTPVerification from '../../components/auth/OTPVerification'
 import PasswordStrength from '../../components/auth/PasswordStrength'
 
@@ -68,6 +69,7 @@ export default function ForgotPassword() {
             <div className="auth-card">
                 {step === 1 && (
                     <div className="animate-fade-up">
+                        <img src={nitwLogo} alt="NIT Warangal" className="auth-logo" />
                         <h1>Forgot Password</h1>
                         <p className="subtitle">Enter your registered email to receive a verification code</p>
 
@@ -103,6 +105,7 @@ export default function ForgotPassword() {
 
                 {step === 3 && (
                     <div className="animate-fade-up">
+                        <img src={nitwLogo} alt="NIT Warangal" className="auth-logo" />
                         <h1>Reset Password</h1>
                         <p className="subtitle">Create a new password for your account</p>
 
