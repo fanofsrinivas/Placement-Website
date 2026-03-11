@@ -1,0 +1,114 @@
+.skeletonContainer {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.skeletonHeader {
+    height: 32px;
+    width: 40%;
+    margin-bottom: 12px;
+}
+
+.skeletonSubheader {
+    height: 16px;
+    width: 60%;
+    margin-bottom: 32px;
+}
+
+.skeletonRow {
+    height: 60px;
+    margin-bottom: 12px;
+}
+
+.skeletonGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 32px;
+}
+
+.skeletonCard {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.skeletonIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.skeletonLines {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeletonLine {
+    height: 14px;
+}
+
+/* NotFound */
+.notFound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    text-align: center;
+    padding: 32px;
+}
+
+.notFoundCode {
+    font-size: 120px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.notFoundTitle {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 16px 0 8px;
+    color: var(--text);
+}
+
+.notFoundDesc {
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    max-width: 400px;
+}
+
+/* ErrorBoundary */
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+    padding: 32px;
+}
+
+.errorIcon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.errorTitle {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.errorMessage {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
