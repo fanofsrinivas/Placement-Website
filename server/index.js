@@ -44,9 +44,14 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ message: 'API route not found' });
+// Serve React frontend in production
+const path = require('path');
+const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientBuildPath));
+
+// Catch-all: serve React app for any non-API route
+app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // Error handler
