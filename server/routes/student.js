@@ -7,7 +7,7 @@ const {
     browseJobs, applyToJob, getMyApplications, getDashboard,
 } = require('../controllers/studentController');
 
-router.use(protect, requireRole('student'));
+router.use(protect, requireRole('student', 'coordinator', 'tpo', 'admin'));
 
 router.get('/dashboard', getDashboard);
 router.get('/profile', getProfile);

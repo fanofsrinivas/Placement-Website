@@ -68,11 +68,39 @@ export const AuthProvider = ({ children }) => {
         fetchUser();
     }, [token, logout]);
 
+    // Step 1: Password login → returns { requireOTP, email }
     const login = async (email, password, role) => {
         const res = await api.post('/auth/login', { email, password, role });
+        return res.data;
+    };
+
+    // Step 2: Verify Login OTP → returns JWT + user
+    const verifyLoginOTP = async (email, otp) => {
+        const res = await api.post('/auth/login/verify-otp', { email, otp });
         localStorage.setItem('cpms_token', res.data.token);
         setToken(res.data.token);
         setUser(res.data.user);
+        return res.data;
+    };
+
+    // Resend login OTP
+    const resendLoginOTP = async (email) => {
+        const res = await api.post('/auth/login/resend-otp', { email });
+        return res.data;
+    };
+
+    // Verify Email OTP (Registration)
+    const verifyEmailOTP = async (email, otp) => {
+        const res = await api.post('/auth/verify-otp', { email, otp });
+        // After verifying email, we can refresh user state if needed
+        const meRes = await api.get('/auth/me');
+        setUser(meRes.data);
+        return res.data;
+    };
+
+    // Resend Email OTP (Registration)
+    const resendEmailOTP = async (email) => {
+        const res = await api.post('/auth/resend-otp', { email });
         return res.data;
     };
 
@@ -92,10 +120,27 @@ export const AuthProvider = ({ children }) => {
         return res.data;
     };
 
+    const registerCoordinator = async (data) => {
+        const res = await api.post('/auth/register/coordinator', data);
+        localStorage.setItem('cpms_token', res.data.token);
+        setToken(res.data.token);
+        setUser(res.data.user);
+        return res.data;
+    };
+
+    const registerFaculty = async (data) => {
+        const res = await api.post('/auth/register/faculty', data);
+        localStorage.setItem('cpms_token', res.data.token);
+        setToken(res.data.token);
+        setUser(res.data.user);
+        return res.data;
+    };
+
     return (
         <AuthContext.Provider value={{
-            user, token, loading, login, logout,
-            registerStudent, registerCompany, api,
+            user, token, loading, login, verifyLoginOTP, resendLoginOTP,
+            verifyEmailOTP, resendEmailOTP,
+            logout, registerStudent, registerCompany, registerCoordinator, registerFaculty, api,
         }}>
             {children}
         </AuthContext.Provider>

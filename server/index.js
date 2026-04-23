@@ -12,6 +12,8 @@ const studentRoutes = require('./routes/student');
 const companyRoutes = require('./routes/company');
 const adminRoutes = require('./routes/admin');
 const tpoRoutes = require('./routes/tpo');
+const coordinatorRoutes = require('./routes/coordinator');
+const facultyRoutes = require('./routes/faculty');
 const publicRoutes = require('./routes/public');
 
 const app = express();
@@ -37,6 +39,8 @@ app.use('/api/student', studentRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tpo', tpoRoutes);
+app.use('/api/coordinator', coordinatorRoutes);
+app.use('/api/faculty', facultyRoutes);
 app.use('/api/public', publicRoutes);
 
 // Health check

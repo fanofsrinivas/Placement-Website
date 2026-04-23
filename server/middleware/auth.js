@@ -1,6 +1,16 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Role hierarchy levels (higher number = more privileges)
+const ROLE_HIERARCHY = {
+    student: 1,
+    coordinator: 2,
+    faculty: 2,
+    tpo: 3,
+    admin: 4,
+    company: 0, // separate track, not in main hierarchy
+};
+
 // Verify JWT token
 const protect = async (req, res, next) => {
     let token;
@@ -44,4 +54,18 @@ const requireVerified = (req, res, next) => {
     next();
 };
 
-module.exports = { protect, requireRole, requireVerified };
+// Hierarchical role check — requires at minimum the given role level
+const requireMinRole = (minRole) => {
+    return (req, res, next) => {
+        const userLevel = ROLE_HIERARCHY[req.user.role] || 0;
+        const requiredLevel = ROLE_HIERARCHY[minRole] || 0;
+        if (userLevel < requiredLevel) {
+            return res.status(403).json({
+                message: 'Access denied. Insufficient role privileges.',
+            });
+        }
+        next();
+    };
+};
+
+module.exports = { protect, requireRole, requireVerified, requireMinRole, ROLE_HIERARCHY };

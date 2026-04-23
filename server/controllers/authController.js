@@ -170,14 +170,14 @@ exports.resendOTP = async (req, res) => {
     }
 };
 
-// @desc    Login
+// @desc    Login Step 1 — Verify password, then send OTP
 // @route   POST /api/auth/login
 exports.login = async (req, res) => {
     try {
         const { email, password, role } = req.body;
 
-        // If logging in as student, enforce NITW email
-        if (role === 'student' && !/@(student\.)?nitw\.ac\.in$/i.test(email)) {
+        // If logging in as student/coordinator/faculty, enforce NITW email
+        if ((role === 'student' || role === 'coordinator' || role === 'faculty') && !/@(student\.)?nitw\.ac\.in$/i.test(email)) {
             return res.status(400).json({ message: 'Only official NIT Warangal email IDs (@nitw.ac.in) are allowed.' });
         }
 
@@ -191,12 +191,47 @@ exports.login = async (req, res) => {
         const isMatch = await user.comparePassword(password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
 
+        // Password correct — now send OTP for 2FA
+        const otp = generateOTP();
+        user.otp = { code: otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000), purpose: 'login' };
+        await user.save();
+
+        await sendOTPEmail(email, otp);
+
+        res.json({
+            message: 'Password verified. OTP sent to your email for verification.',
+            requireOTP: true,
+            email: user.email,
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Login Step 2 — Verify OTP and issue token
+// @route   POST /api/auth/login/verify-otp
+exports.verifyLoginOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(404).json({ message: 'User not found.' });
+        if (!user.otp || !user.otp.code) return res.status(400).json({ message: 'No OTP pending. Please login again.' });
+        if (user.otp.purpose !== 'login') return res.status(400).json({ message: 'Invalid OTP purpose.' });
+        if (new Date() > user.otp.expiresAt) return res.status(400).json({ message: 'OTP has expired. Please login again.' });
+        if (user.otp.code !== otp) return res.status(400).json({ message: 'Invalid OTP.' });
+
+        // OTP verified — clear it and issue token
+        user.otp = undefined;
+        user.isEmailVerified = true;
+        await user.save();
+
         await AuditLog.create({
             action: 'USER_LOGIN',
             actor: user._id,
             target: user._id,
             targetModel: 'User',
-            details: { role: user.role },
+            details: { role: user.role, method: '2FA' },
             ipAddress: req.ip,
         });
 
@@ -214,6 +249,25 @@ exports.login = async (req, res) => {
                 companyProfile: user.companyProfile,
             },
         });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Resend Login OTP
+// @route   POST /api/auth/login/resend-otp
+exports.resendLoginOTP = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found.' });
+
+        const otp = generateOTP();
+        user.otp = { code: otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000), purpose: 'login' };
+        await user.save();
+        await sendOTPEmail(email, otp);
+
+        res.json({ message: 'Login OTP resent successfully.' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -274,6 +328,128 @@ exports.getMe = async (req, res) => {
         const user = await User.findById(req.user._id).select('-password -otp');
         res.json(user);
     } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Register Student Coordinator (self-registration, needs admin approval)
+// @route   POST /api/auth/register/coordinator
+exports.registerCoordinator = async (req, res) => {
+    try {
+        const { email, password, firstName, lastName, rollNumber, branch, degree, cgpa, departments } = req.body;
+
+        // Strict NITW email check
+        if (!/@(student\.)?nitw\.ac\.in$/i.test(email)) {
+            return res.status(400).json({ message: 'Only official NIT Warangal email IDs (@nitw.ac.in) are allowed.' });
+        }
+
+        if (cgpa !== undefined && (cgpa < 0 || cgpa > 10)) {
+            return res.status(400).json({ message: 'CGPA must be between 0 and 10.' });
+        }
+
+        const exists = await User.findOne({ email });
+        if (exists) return res.status(400).json({ message: 'Email already registered.' });
+
+        const otp = generateOTP();
+
+        const user = await User.create({
+            email,
+            password,
+            role: 'coordinator',
+            isVerified: false, // Needs admin approval
+            otp: { code: otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000), purpose: 'email_verify' },
+            studentProfile: { firstName, lastName, rollNumber, branch, degree, cgpa },
+            coordinatorProfile: { departments: departments || [] },
+        });
+
+        user.calculateProfileCompletion();
+        await user.save();
+
+        await sendOTPEmail(email, otp);
+
+        await AuditLog.create({
+            action: 'USER_REGISTERED',
+            actor: user._id,
+            target: user._id,
+            targetModel: 'User',
+            details: { role: 'coordinator', email },
+        });
+
+        const token = generateToken(user._id);
+
+        res.status(201).json({
+            message: 'Registration successful. Please verify your email and await admin approval.',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+                isVerified: user.isVerified,
+                isEmailVerified: user.isEmailVerified,
+                studentProfile: user.studentProfile,
+            },
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Email already registered.' });
+        }
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Register Faculty (Department Coordinator)
+// @route   POST /api/auth/register/faculty
+exports.registerFaculty = async (req, res) => {
+    try {
+        const { email, password, firstName, lastName, employeeId, designation, phone, departments } = req.body;
+
+        // Strict NITW email check
+        if (!/@nitw\.ac\.in$/i.test(email)) {
+            return res.status(400).json({ message: 'Only official NIT Warangal email IDs (@nitw.ac.in) are allowed for faculty.' });
+        }
+
+        const exists = await User.findOne({ email });
+        if (exists) return res.status(400).json({ message: 'Email already registered.' });
+
+        const otp = generateOTP();
+
+        const user = await User.create({
+            email,
+            password,
+            role: 'faculty',
+            isVerified: false, // Needs admin approval
+            otp: { code: otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000), purpose: 'email_verify' },
+            facultyProfile: { firstName, lastName, employeeId, designation, phone, departments: departments || [] },
+        });
+
+        await sendOTPEmail(email, otp);
+
+        await AuditLog.create({
+            action: 'USER_REGISTERED',
+            actor: user._id,
+            target: user._id,
+            targetModel: 'User',
+            details: { role: 'faculty', email, designation },
+        });
+
+        const token = generateToken(user._id);
+
+        res.status(201).json({
+            message: 'Registration successful. Please verify your email and await admin approval.',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+                isVerified: user.isVerified,
+                isEmailVerified: user.isEmailVerified,
+                facultyProfile: user.facultyProfile,
+            },
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Email already registered.' });
+        }
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };

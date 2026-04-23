@@ -4,6 +4,7 @@ const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const generateJAF = require('../utils/generateJAF');
 const { sendStatusEmail } = require('../utils/sendEmail');
+const { createStyledWorkbook, formatCandidateData } = require('../utils/excelUtils');
 
 // @desc    Get company dashboard
 // @route   GET /api/company/dashboard
@@ -38,7 +39,7 @@ exports.createJob = async (req, res) => {
         const job = await Job.create({
             ...req.body,
             company: req.user._id,
-            status: 'pending', // ALWAYS pending by default
+            status: 'pending',
         });
 
         await AuditLog.create({
@@ -89,7 +90,6 @@ exports.updateJob = async (req, res) => {
         const job = await Job.findOne({ _id: req.params.id, company: req.user._id });
         if (!job) return res.status(404).json({ message: 'Job not found.' });
 
-        // If job was already approved & substantive change is made, reset to pending
         const substantiveFields = ['title', 'description', 'eligibility', 'packageLPA'];
         const hasSubstantiveChange = substantiveFields.some((f) => req.body[f] !== undefined);
         if (job.status === 'approved' && hasSubstantiveChange) {
@@ -112,7 +112,6 @@ exports.deleteJob = async (req, res) => {
         const job = await Job.findOneAndDelete({ _id: req.params.id, company: req.user._id });
         if (!job) return res.status(404).json({ message: 'Job not found.' });
 
-        // Delete related applications
         await Application.deleteMany({ job: job._id });
 
         res.json({ message: 'Job deleted successfully.' });
@@ -128,7 +127,6 @@ exports.getCandidates = async (req, res) => {
         const { jobId } = req.params;
         const { page = 1, limit = 50, stage, search } = req.query;
 
-        // Verify job belongs to this company
         const job = await Job.findOne({ _id: jobId, company: req.user._id });
         if (!job) return res.status(404).json({ message: 'Job not found.' });
 
@@ -151,22 +149,14 @@ exports.getCandidates = async (req, res) => {
 
         const total = await Application.countDocuments(query);
 
-        // Group by stage for Kanban
         const pipeline = {
-            Applied: [],
-            Screening: [],
-            Test: [],
-            'Tech Interview': [],
-            HR: [],
-            Selected: [],
-            Rejected: [],
+            Applied: [], Screening: [], Test: [],
+            'Tech Interview': [], HR: [], Selected: [], Rejected: [],
         };
 
         const allApps = await Application.find({ job: jobId }).populate('student', 'email studentProfile');
         allApps.forEach((app) => {
-            if (pipeline[app.stage]) {
-                pipeline[app.stage].push(app);
-            }
+            if (pipeline[app.stage]) pipeline[app.stage].push(app);
         });
 
         res.json({ pipeline, applications, total, totalPages: Math.ceil(total / limit) });
@@ -188,25 +178,18 @@ exports.updateCandidateStage = async (req, res) => {
         const application = await Application.findById(req.params.id).populate('student', 'email studentProfile');
         if (!application) return res.status(404).json({ message: 'Application not found.' });
 
-        // Verify the job belongs to this company
         const job = await Job.findOne({ _id: application.job, company: req.user._id });
         if (!job) return res.status(403).json({ message: 'Access denied.' });
 
         const oldStage = application.stage;
         application.stage = stage;
-        application.stageHistory.push({
-            stage,
-            changedBy: req.user._id,
-            notes,
-        });
+        application.stageHistory.push({ stage, changedBy: req.user._id, notes });
         await application.save();
 
-        // If selected, update counters
         if (stage === 'Selected' && oldStage !== 'Selected') {
             await Job.findByIdAndUpdate(application.job, { $inc: { selectedCount: 1 } });
         }
 
-        // Send email notification
         const studentName = `${application.student.studentProfile?.firstName || ''} ${application.student.studentProfile?.lastName || ''}`.trim();
         await sendStatusEmail(application.student.email, studentName, job.title, stage);
 
@@ -266,36 +249,158 @@ exports.generateJAFPdf = async (req, res) => {
     }
 };
 
-// @desc    Export candidates list
+// @desc    Export candidates list (professional formatting)
 // @route   GET /api/company/jobs/:jobId/export
 exports.exportCandidates = async (req, res) => {
     try {
-        const XLSX = require('xlsx');
         const { jobId } = req.params;
-
         const job = await Job.findOne({ _id: jobId, company: req.user._id });
         if (!job) return res.status(404).json({ message: 'Job not found.' });
 
-        const applications = await Application.find({ job: jobId }).populate('student', 'email studentProfile');
+        const applications = await Application.find({ job: jobId })
+            .populate('student', 'email studentProfile');
 
-        const data = applications.map((app) => ({
-            Name: `${app.student.studentProfile?.firstName || ''} ${app.student.studentProfile?.lastName || ''}`,
-            Email: app.student.email,
-            'Roll Number': app.student.studentProfile?.rollNumber || '',
-            Branch: app.student.studentProfile?.branch || '',
-            CGPA: app.student.studentProfile?.cgpa || '',
-            Stage: app.stage,
-            'Applied Date': app.createdAt.toISOString().split('T')[0],
-        }));
+        const data = formatCandidateData(applications);
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'Candidates');
-        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        const stageCounts = {};
+        applications.forEach((app) => { stageCounts[app.stage] = (stageCounts[app.stage] || 0) + 1; });
+
+        const summary = [
+            { label: 'Job Title', value: job.title },
+            { label: 'Total Applicants', value: applications.length },
+            ...Object.entries(stageCounts).map(([stage, count]) => ({ label: `Stage: ${stage}`, value: count })),
+            { label: 'Export Date', value: new Date().toLocaleDateString('en-IN') },
+        ];
+
+        const buffer = createStyledWorkbook({
+            sheets: [{ name: 'Candidates', data }],
+            summary,
+        });
 
         res.set({
             'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition': `attachment; filename=Candidates_${job.title.replace(/\s+/g, '_')}.xlsx`,
+        });
+        res.send(buffer);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get all student registrations/applications across all company jobs
+// @route   GET /api/company/registrations
+exports.getStudentRegistrations = async (req, res) => {
+    try {
+        const { page = 1, limit = 50, search, stage, branch, jobId } = req.query;
+
+        const jobQuery = { company: req.user._id };
+        if (jobId) jobQuery._id = jobId;
+
+        const jobs = await Job.find(jobQuery).select('_id title');
+        const jobIds = jobs.map((j) => j._id);
+
+        const appQuery = { job: { $in: jobIds } };
+        if (stage) appQuery.stage = stage;
+
+        let applications = await Application.find(appQuery)
+            .populate('student', 'email studentProfile')
+            .populate('job', 'title jobType packageLPA deadline')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        if (search) {
+            const s = search.toLowerCase();
+            applications = applications.filter((app) => {
+                const sp = app.student?.studentProfile;
+                const name = `${sp?.firstName || ''} ${sp?.lastName || ''}`.toLowerCase();
+                const email = (app.student?.email || '').toLowerCase();
+                const roll = (sp?.rollNumber || '').toLowerCase();
+                return name.includes(s) || email.includes(s) || roll.includes(s);
+            });
+        }
+
+        if (branch) {
+            applications = applications.filter((app) => app.student?.studentProfile?.branch === branch);
+        }
+
+        const total = await Application.countDocuments(appQuery);
+
+        const registrations = applications.map((app) => {
+            const sp = app.student?.studentProfile || {};
+            return {
+                _id: app._id,
+                studentId: app.student?._id,
+                studentName: `${sp.firstName || ''} ${sp.lastName || ''}`.trim(),
+                rollNumber: sp.rollNumber || '',
+                branch: sp.branch || '',
+                degree: sp.degree || '',
+                cgpa: sp.cgpa || 0,
+                activeBacklogs: sp.activeBacklogs || 0,
+                email: app.student?.email || '',
+                phone: sp.phone || '',
+                gender: sp.gender || '',
+                tenthPercentage: sp.tenthPercentage || null,
+                twelfthPercentage: sp.twelfthPercentage || null,
+                resumeUrl: sp.resumeUrl || '',
+                isPlaced: sp.isPlaced || false,
+                placedCompany: sp.placedCompany || '',
+                stage: app.stage,
+                jobTitle: app.job?.title || '',
+                jobType: app.job?.jobType || '',
+                packageLPA: app.job?.packageLPA || {},
+                appliedDate: app.createdAt,
+                updatedDate: app.updatedAt,
+            };
+        });
+
+        res.json({
+            registrations,
+            jobs: jobs.map((j) => ({ _id: j._id, title: j.title })),
+            totalPages: Math.ceil(total / limit),
+            currentPage: parseInt(page),
+            total,
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Export all student registrations across all jobs
+// @route   GET /api/company/registrations/export
+exports.exportStudentRegistrations = async (req, res) => {
+    try {
+        const jobs = await Job.find({ company: req.user._id }).select('_id title');
+        const jobIds = jobs.map((j) => j._id);
+
+        const applications = await Application.find({ job: { $in: jobIds } })
+            .populate('student', 'email studentProfile')
+            .populate('job', 'title jobType packageLPA');
+
+        const data = formatCandidateData(applications).map((row, idx) => ({
+            ...row,
+            'Job Title': applications[idx]?.job?.title || 'N/A',
+            'Job Type': applications[idx]?.job?.jobType || 'N/A',
+        }));
+
+        const stageCounts = {};
+        applications.forEach((app) => { stageCounts[app.stage] = (stageCounts[app.stage] || 0) + 1; });
+
+        const summary = [
+            { label: 'Total Registrations', value: applications.length },
+            ...Object.entries(stageCounts).map(([stage, count]) => ({ label: `Stage: ${stage}`, value: count })),
+            { label: 'Total Jobs', value: jobs.length },
+            { label: 'Export Date', value: new Date().toLocaleDateString('en-IN') },
+        ];
+
+        const buffer = createStyledWorkbook({
+            sheets: [{ name: 'Student Registrations', data }],
+            summary,
+        });
+
+        res.set({
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition': 'attachment; filename=Student_Registrations.xlsx',
         });
         res.send(buffer);
     } catch (error) {

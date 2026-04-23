@@ -5,6 +5,7 @@ const {
     getDashboard, createJob, getJobs, updateJob, deleteJob,
     getCandidates, updateCandidateStage, scheduleInterview,
     generateJAFPdf, exportCandidates,
+    getStudentRegistrations, exportStudentRegistrations,
 } = require('../controllers/companyController');
 
 router.use(protect, requireRole('company'));
@@ -17,5 +18,9 @@ router.put('/applications/:id/stage', requireVerified, updateCandidateStage);
 router.put('/applications/:id/interview', requireVerified, scheduleInterview);
 router.get('/jobs/:id/jaf', generateJAFPdf);
 router.get('/jobs/:jobId/export', exportCandidates);
+
+// Student registrations
+router.get('/registrations', getStudentRegistrations);
+router.get('/registrations/export', exportStudentRegistrations);
 
 module.exports = router;

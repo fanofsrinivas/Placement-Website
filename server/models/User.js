@@ -13,12 +13,12 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: [true, 'Password is required'],
+            required: false,
             minlength: [8, 'Password must be at least 8 characters'],
         },
         role: {
             type: String,
-            enum: ['student', 'company', 'admin', 'tpo'],
+            enum: ['student', 'company', 'admin', 'tpo', 'coordinator', 'faculty'],
             required: true,
         },
         isVerified: {
@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema(
         otp: {
             code: String,
             expiresAt: Date,
+            purpose: { type: String, enum: ['email_verify', 'login', 'password_reset'], default: 'email_verify' },
         },
 
         // Student-specific fields
@@ -42,12 +43,28 @@ const userSchema = new mongoose.Schema(
             branch: {
                 type: String,
                 enum: [
-                    'CSE', 'ECE', 'EEE', 'ME', 'CE', 'CHE', 'MME', 'BT', 'PHY', 'CHEM', 'MATH', 'MSE', 'Other',
+                    'Civil Engineering',
+                    'Electrical Engineering',
+                    'Mechanical Engineering',
+                    'Electronics and Communication Engineering',
+                    'Metallurgical and Materials Engineering',
+                    'Chemical Engineering',
+                    'Computer Science and Engineering',
+                    'Biotechnology',
+                    'Electronics and Communication Engineering (VLSI Design and Technology)',
+                    'Mathematics and Computing',
+                    'Computer Science and Engineering (Artificial Intelligence & Data Science)',
+                    'Integrated M.Sc. Mathematics',
+                    'Integrated M.Sc. Physics',
+                    'Integrated M.Sc. Chemistry',
+                    'Dual Degree - Chemical Engineering',
+                    'Dual Degree - Metallurgical and Materials Engineering',
+                    'Other',
                 ],
             },
             degree: {
                 type: String,
-                enum: ['B.Tech', 'M.Tech', 'MSc', 'MCA', 'PhD'],
+                enum: ['B.Tech', 'M.Tech', 'MSc', 'MCA', 'PhD', 'Dual Degree', 'Integrated MSc'],
             },
             cgpa: {
                 type: Number,
@@ -93,6 +110,66 @@ const userSchema = new mongoose.Schema(
                 enum: ['1-50', '51-200', '201-500', '501-1000', '1000+'],
             },
             headquarters: String,
+        },
+
+        // Coordinator-specific fields
+        coordinatorProfile: {
+            departments: [{
+                type: String,
+                enum: [
+                    'Civil Engineering',
+                    'Electrical Engineering',
+                    'Mechanical Engineering',
+                    'Electronics and Communication Engineering',
+                    'Metallurgical and Materials Engineering',
+                    'Chemical Engineering',
+                    'Computer Science and Engineering',
+                    'Biotechnology',
+                    'Electronics and Communication Engineering (VLSI Design and Technology)',
+                    'Mathematics and Computing',
+                    'Computer Science and Engineering (Artificial Intelligence & Data Science)',
+                    'Integrated M.Sc. Mathematics',
+                    'Integrated M.Sc. Physics',
+                    'Integrated M.Sc. Chemistry',
+                    'Dual Degree - Chemical Engineering',
+                    'Dual Degree - Metallurgical and Materials Engineering',
+                    'Other',
+                ],
+            }],
+        },
+
+        // Faculty (Department Coordinator) specific fields
+        facultyProfile: {
+            firstName: String,
+            lastName: String,
+            employeeId: String,
+            designation: {
+                type: String,
+                enum: ['Professor', 'Associate Professor', 'Assistant Professor', 'HoD', 'Other'],
+            },
+            phone: String,
+            departments: [{
+                type: String,
+                enum: [
+                    'Civil Engineering',
+                    'Electrical Engineering',
+                    'Mechanical Engineering',
+                    'Electronics and Communication Engineering',
+                    'Metallurgical and Materials Engineering',
+                    'Chemical Engineering',
+                    'Computer Science and Engineering',
+                    'Biotechnology',
+                    'Electronics and Communication Engineering (VLSI Design and Technology)',
+                    'Mathematics and Computing',
+                    'Computer Science and Engineering (Artificial Intelligence & Data Science)',
+                    'Integrated M.Sc. Mathematics',
+                    'Integrated M.Sc. Physics',
+                    'Integrated M.Sc. Chemistry',
+                    'Dual Degree - Chemical Engineering',
+                    'Dual Degree - Metallurgical and Materials Engineering',
+                    'Other',
+                ],
+            }],
         },
     },
     { timestamps: true }

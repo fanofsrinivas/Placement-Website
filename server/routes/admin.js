@@ -4,6 +4,7 @@ const { protect, requireRole } = require('../middleware/auth');
 const {
     getDashboard, getPendingUsers, verifyUser,
     getPendingJobs, approveJob, getAuditLogs,
+    assignUserRole, getAllUsers,
 } = require('../controllers/adminController');
 
 router.use(protect, requireRole('admin'));
@@ -14,5 +15,7 @@ router.put('/verify/:id', verifyUser);
 router.get('/job-approvals', getPendingJobs);
 router.put('/job-approvals/:id', approveJob);
 router.get('/audit-logs', getAuditLogs);
+router.get('/users', getAllUsers);
+router.put('/users/:id/role', assignUserRole);
 
 module.exports = router;

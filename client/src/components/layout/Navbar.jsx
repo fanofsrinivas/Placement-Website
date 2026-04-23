@@ -14,6 +14,8 @@ const Navbar = () => {
             case 'company': return '/company/dashboard';
             case 'admin': return '/admin/dashboard';
             case 'tpo': return '/tpo/dashboard';
+            case 'coordinator': return '/coordinator/dashboard';
+            case 'faculty': return '/faculty/dashboard';
             default: return '/';
         }
     };
@@ -24,6 +26,9 @@ const Navbar = () => {
         }
         if (user?.role === 'company') {
             return (user.companyProfile?.companyName?.[0] || user.email[0]).toUpperCase();
+        }
+        if (user?.role === 'faculty') {
+            return (user.facultyProfile?.firstName?.[0] || user.email[0]).toUpperCase();
         }
         return user?.email?.[0]?.toUpperCase() || '?';
     };

@@ -23,6 +23,8 @@ import ContactUs from './pages/public/ContactUs';
 import Login from './pages/auth/Login';
 import StudentRegister from './pages/auth/StudentRegister';
 import CompanyRegister from './pages/auth/CompanyRegister';
+import CoordinatorRegister from './pages/auth/CoordinatorRegister';
+import FacultyRegister from './pages/auth/FacultyRegister';
 import ForgotPassword from './pages/auth/ForgotPassword';
 
 // Student Pages
@@ -36,6 +38,7 @@ import CompanyDashboard from './pages/company/Dashboard';
 import JobManagement from './pages/company/JobManagement';
 import CandidatePipeline from './pages/company/CandidatePipeline';
 import InterviewScheduler from './pages/company/InterviewScheduler';
+import StudentRegistrations from './pages/company/StudentRegistrations';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -47,6 +50,18 @@ import TPODashboard from './pages/tpo/Dashboard';
 import DriveManagement from './pages/tpo/DriveManagement';
 import LegacyDataImport from './pages/tpo/LegacyDataImport';
 import PlacementAnalytics from './pages/tpo/PlacementAnalytics';
+
+// Coordinator Pages
+import CoordinatorDashboard from './pages/coordinator/Dashboard';
+import CoordDriveManagement from './pages/coordinator/DriveManagement';
+import CoordJobPostings from './pages/coordinator/JobPostings';
+import ApplicationDataGrid from './pages/coordinator/ApplicationDataGrid';
+import DepartmentStudents from './pages/coordinator/DepartmentStudents';
+
+// Faculty Pages
+import FacultyDashboard from './pages/faculty/Dashboard';
+import FacultyStudents from './pages/faculty/DepartmentStudents';
+import FacultyPlacementReport from './pages/faculty/PlacementReport';
 
 function App() {
   return (
@@ -69,6 +84,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register/student" element={<StudentRegister />} />
               <Route path="/register/company" element={<CompanyRegister />} />
+              <Route path="/register/coordinator" element={<CoordinatorRegister />} />
+              <Route path="/register/faculty" element={<FacultyRegister />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
 
               {/* Student Routes */}
@@ -91,6 +108,7 @@ function App() {
               }>
                 <Route path="dashboard" element={<CompanyDashboard />} />
                 <Route path="jobs" element={<JobManagement />} />
+                <Route path="registrations" element={<StudentRegistrations />} />
                 <Route path="pipeline" element={<CandidatePipeline />} />
                 <Route path="interviews" element={<InterviewScheduler />} />
               </Route>
@@ -108,7 +126,7 @@ function App() {
 
               {/* TPO Routes */}
               <Route path="/tpo" element={
-                <ProtectedRoute roles={['tpo']}>
+                <ProtectedRoute roles={['tpo', 'admin']}>
                   <Sidebar role="tpo" />
                 </ProtectedRoute>
               }>
@@ -116,6 +134,30 @@ function App() {
                 <Route path="drives" element={<DriveManagement />} />
                 <Route path="legacy-import" element={<LegacyDataImport />} />
                 <Route path="analytics" element={<PlacementAnalytics />} />
+              </Route>
+
+              {/* Coordinator Routes */}
+              <Route path="/coordinator" element={
+                <ProtectedRoute roles={['coordinator', 'tpo', 'admin']}>
+                  <Sidebar role="coordinator" />
+                </ProtectedRoute>
+              }>
+                <Route path="dashboard" element={<CoordinatorDashboard />} />
+                <Route path="drives" element={<CoordDriveManagement />} />
+                <Route path="jobs" element={<CoordJobPostings />} />
+                <Route path="applications" element={<ApplicationDataGrid />} />
+                <Route path="students" element={<DepartmentStudents />} />
+              </Route>
+
+              {/* Faculty Routes */}
+              <Route path="/faculty" element={
+                <ProtectedRoute roles={['faculty', 'admin']}>
+                  <Sidebar role="faculty" />
+                </ProtectedRoute>
+              }>
+                <Route path="dashboard" element={<FacultyDashboard />} />
+                <Route path="students" element={<FacultyStudents />} />
+                <Route path="placements" element={<FacultyPlacementReport />} />
               </Route>
 
               {/* 404 */}

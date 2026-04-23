@@ -5,10 +5,10 @@ const { uploadExcel } = require('../middleware/upload');
 const {
     getDashboard, createDrive, getDrives, updateDrive, deleteDrive,
     downloadTemplate, parseExcel, validateData, importData,
-    getAnalytics,
+    getAnalytics, notifyEligibleStudents,
 } = require('../controllers/tpoController');
 
-router.use(protect, requireRole('tpo'));
+router.use(protect, requireRole('tpo', 'admin'));
 
 router.get('/dashboard', getDashboard);
 router.route('/drives').get(getDrives).post(createDrive);
@@ -22,5 +22,8 @@ router.post('/legacy/import', importData);
 
 // Analytics
 router.get('/analytics', getAnalytics);
+
+// Notify eligible students for a job
+router.post('/jobs/:id/notify', notifyEligibleStudents);
 
 module.exports = router;

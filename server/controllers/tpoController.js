@@ -3,6 +3,8 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
+const { createStyledWorkbook } = require('../utils/excelUtils');
+const { sendJobNotificationEmail } = require('../utils/sendEmail');
 const XLSX = require('xlsx');
 
 // @desc    TPO Dashboard
@@ -16,7 +18,6 @@ exports.getDashboard = async (req, res) => {
         const totalCompanies = await User.countDocuments({ role: 'company', isVerified: true });
         const totalJobs = await Job.countDocuments({ status: 'approved' });
 
-        // Package stats
         const packageStats = await Application.aggregate([
             { $match: { stage: 'Selected' } },
             { $lookup: { from: 'jobs', localField: 'job', foreignField: '_id', as: 'jobDetails' } },
@@ -112,7 +113,7 @@ exports.deleteDrive = async (req, res) => {
     }
 };
 
-// @desc    Download Excel import template
+// @desc    Download Excel import template (styled)
 // @route   GET /api/tpo/legacy/template
 exports.downloadTemplate = async (req, res) => {
     try {
@@ -122,9 +123,42 @@ exports.downloadTemplate = async (req, res) => {
             'Placement Year', 'Job Type',
         ];
 
+        const sampleRow = {
+            'Student Name': 'John Doe',
+            'Email': 'john@student.nitw.ac.in',
+            'Roll Number': '21CSE001',
+            'Branch': 'Computer Science and Engineering',
+            'Degree': 'B.Tech',
+            'CGPA': '8.5',
+            'Company Name': 'Google',
+            'Job Title': 'Software Engineer',
+            'Package (LPA)': '25',
+            'Placement Year': '2025',
+            'Job Type': 'Full-Time',
+        };
+
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet([headers]);
+        const ws = XLSX.utils.json_to_sheet([sampleRow]);
+
+        // Style the template
+        ws['!cols'] = headers.map((h) => ({ wch: Math.max(h.length + 6, 18) }));
+
         XLSX.utils.book_append_sheet(wb, ws, 'Template');
+
+        // Add instructions sheet
+        const instructions = [
+            { Instruction: 'Fill in the data starting from row 2 (row 1 has headers)' },
+            { Instruction: 'Keep the column headers exactly as they are' },
+            { Instruction: 'Branch must match: CSE, ECE, EEE, ME, CE, CHE, MME, BT, etc.' },
+            { Instruction: 'Degree must be: B.Tech, M.Tech, MSc, MCA, PhD, Dual Degree, Integrated MSc' },
+            { Instruction: 'CGPA should be between 0 and 10' },
+            { Instruction: 'Job Type: Full-Time, Internship, 6-Month Internship + FTE, PPO' },
+            { Instruction: 'Email should be a valid NITW email (@student.nitw.ac.in)' },
+        ];
+        const instWs = XLSX.utils.json_to_sheet(instructions);
+        instWs['!cols'] = [{ wch: 70 }];
+        XLSX.utils.book_append_sheet(wb, instWs, 'Instructions');
+
         const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
         res.set({
@@ -143,7 +177,6 @@ exports.parseExcel = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'Please upload a file.' });
 
-        // Read from local file
         const fs = require('fs');
         const buffer = fs.readFileSync(req.file.path);
         const wb = XLSX.read(buffer, { type: 'buffer' });
@@ -211,13 +244,12 @@ exports.importData = async (req, res) => {
 
         for (const record of records) {
             try {
-                // Check if student already exists
                 let student = await User.findOne({ email: record.email });
 
                 if (!student) {
                     student = await User.create({
                         email: record.email,
-                        password: 'ChangeMe@123', // temporary
+                        password: 'ChangeMe@123',
                         role: 'student',
                         isVerified: true,
                         isEmailVerified: true,
@@ -268,7 +300,6 @@ exports.importData = async (req, res) => {
 // @route   GET /api/tpo/analytics
 exports.getAnalytics = async (req, res) => {
     try {
-        // Branch-wise placement
         const branchWise = await User.aggregate([
             { $match: { role: 'student', 'studentProfile.isPlaced': true } },
             {
@@ -282,7 +313,6 @@ exports.getAnalytics = async (req, res) => {
             { $sort: { placed: -1 } },
         ]);
 
-        // Year-wise placement
         const yearWise = await User.aggregate([
             { $match: { role: 'student', 'studentProfile.isPlaced': true } },
             {
@@ -296,13 +326,11 @@ exports.getAnalytics = async (req, res) => {
             { $sort: { _id: 1 } },
         ]);
 
-        // Total stats per branch
         const branchTotal = await User.aggregate([
             { $match: { role: 'student' } },
             { $group: { _id: '$studentProfile.branch', total: { $sum: 1 } } },
         ]);
 
-        // Company-wise offers
         const companyWise = await Application.aggregate([
             { $match: { stage: 'Selected' } },
             { $lookup: { from: 'jobs', localField: 'job', foreignField: '_id', as: 'job' } },
@@ -321,6 +349,88 @@ exports.getAnalytics = async (req, res) => {
         ]);
 
         res.json({ branchWise, yearWise, branchTotal, companyWise });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Manually notify eligible students for a specific job
+// @route   POST /api/tpo/jobs/:id/notify
+exports.notifyEligibleStudents = async (req, res) => {
+    try {
+        const job = await Job.findById(req.params.id);
+        if (!job) return res.status(404).json({ message: 'Job not found.' });
+
+        if (job.status !== 'approved') {
+            return res.status(400).json({ message: 'Can only notify for approved jobs.' });
+        }
+
+        const company = await User.findById(job.company);
+        const companyName = company?.companyProfile?.companyName || 'Unknown Company';
+
+        // Build query for eligible students
+        const studentQuery = { role: 'student', isVerified: true, isEmailVerified: true };
+
+        if (job.eligibility.branches && job.eligibility.branches.length > 0) {
+            studentQuery['studentProfile.branch'] = { $in: job.eligibility.branches };
+        }
+        if (job.eligibility.minCGPA) {
+            studentQuery['studentProfile.cgpa'] = { $gte: job.eligibility.minCGPA };
+        }
+        if (job.eligibility.maxBacklogs !== undefined && job.eligibility.maxBacklogs !== null) {
+            studentQuery['studentProfile.activeBacklogs'] = { $lte: job.eligibility.maxBacklogs };
+        }
+        if (job.eligibility.degrees && job.eligibility.degrees.length > 0) {
+            studentQuery['studentProfile.degree'] = { $in: job.eligibility.degrees };
+        }
+        if (job.eligibility.passingYears && job.eligibility.passingYears.length > 0) {
+            studentQuery['studentProfile.passingYear'] = { $in: job.eligibility.passingYears };
+        }
+        if (job.eligibility.gender && job.eligibility.gender !== 'All') {
+            studentQuery['studentProfile.gender'] = job.eligibility.gender;
+        }
+
+        const eligibleStudents = await User.find(studentQuery).select('email studentProfile');
+
+        let sent = 0;
+        let failed = 0;
+        for (const student of eligibleStudents) {
+            try {
+                const studentName = `${student.studentProfile?.firstName || ''} ${student.studentProfile?.lastName || ''}`.trim();
+                await sendJobNotificationEmail(
+                    student.email,
+                    studentName,
+                    job.title,
+                    companyName,
+                    job.deadline,
+                    {
+                        jobType: job.jobType,
+                        location: job.location,
+                        packageLPA: job.packageLPA,
+                        stipend: job.stipend,
+                        eligibility: true,
+                    }
+                );
+                sent++;
+                await new Promise(resolve => setTimeout(resolve, 50));
+            } catch (err) {
+                failed++;
+                console.error(`[Notify] Failed to send to ${student.email}:`, err.message);
+            }
+        }
+
+        await AuditLog.create({
+            action: 'STUDENTS_NOTIFIED',
+            actor: req.user._id,
+            target: job._id,
+            targetModel: 'Job',
+            details: { jobTitle: job.title, eligible: eligibleStudents.length, sent, failed },
+        });
+
+        res.json({
+            message: `Notifications sent: ${sent} succeeded, ${failed} failed out of ${eligibleStudents.length} eligible students.`,
+            eligible: eligibleStudents.length, sent, failed,
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

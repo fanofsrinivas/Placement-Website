@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { FiHome, FiUser, FiBriefcase, FiFileText, FiUsers, FiCheckSquare, FiBarChart2, FiUpload, FiSettings, FiCalendar, FiClipboard } from 'react-icons/fi';
+import { FiHome, FiUser, FiBriefcase, FiFileText, FiUsers, FiCheckSquare, FiBarChart2, FiUpload, FiSettings, FiCalendar, FiClipboard, FiGrid } from 'react-icons/fi';
 
 const sidebarConfig = {
     student: {
@@ -17,6 +17,7 @@ const sidebarConfig = {
         links: [
             { to: '/company/dashboard', label: 'Dashboard', icon: <FiHome /> },
             { to: '/company/jobs', label: 'Job Postings', icon: <FiBriefcase /> },
+            { to: '/company/registrations', label: 'Student Registrations', icon: <FiFileText /> },
             { to: '/company/pipeline', label: 'Candidate Pipeline', icon: <FiUsers /> },
             { to: '/company/interviews', label: 'Interviews', icon: <FiCalendar /> },
         ],
@@ -36,6 +37,24 @@ const sidebarConfig = {
             { to: '/tpo/drives', label: 'Drives', icon: <FiSettings /> },
             { to: '/tpo/legacy-import', label: 'Legacy Import', icon: <FiUpload /> },
             { to: '/tpo/analytics', label: 'Analytics', icon: <FiBarChart2 /> },
+        ],
+    },
+    coordinator: {
+        title: 'Coordinator Portal',
+        links: [
+            { to: '/coordinator/dashboard', label: 'Dashboard', icon: <FiHome /> },
+            { to: '/coordinator/drives', label: 'Drive Management', icon: <FiSettings /> },
+            { to: '/coordinator/jobs', label: 'Job Postings', icon: <FiBriefcase /> },
+            { to: '/coordinator/applications', label: 'Application Data', icon: <FiGrid /> },
+            { to: '/coordinator/students', label: 'Dept. Students', icon: <FiUsers /> },
+        ],
+    },
+    faculty: {
+        title: 'Faculty Portal',
+        links: [
+            { to: '/faculty/dashboard', label: 'Dashboard', icon: <FiHome /> },
+            { to: '/faculty/students', label: 'Dept. Students', icon: <FiUsers /> },
+            { to: '/faculty/placements', label: 'Placement Report', icon: <FiBarChart2 /> },
         ],
     },
 };
