@@ -1,0 +1,96 @@
+.placement-container {
+  min-height: 100vh;
+  padding: 40px;
+  max-width: 1400px;
+  margin: auto;
+  background: linear-gradient(135deg, #f1f4f5, #ffffff);
+  color: rgb(22, 16, 104);
+}
+
+.placement-container {
+  padding: 40px;
+  max-width: 1400px;
+  margin: auto;
+}
+
+/* Section spacing */
+.section {
+  margin-bottom: 80px;
+}
+
+/* Card Base Style */
+.card {
+  background: white;
+  backdrop-filter: blur(9px);
+  border-radius: 20px;
+  padding: 12px;
+
+  border: 1.4px solid transparent;   
+
+  box-shadow: 0 15px 40px rgba(188, 189, 190, 0.452);
+  transform: translateY(-6px);
+
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: #0984e3;  
+  box-shadow: 0 15px 40px rgba(56, 72, 115, 0.304);
+}
+
+/* Section Title */
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.side-by-side-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; 
+  align-items: center;
+  width: 100%;
+  max-width: 1300px;
+  margin: 40px auto; 
+  padding: 0 20px;
+  gap: 30px; 
+}
+
+.side-by-side-row > div {
+  flex: 1;
+  display: flex;
+  justify-content: center; 
+}
+
+@media (max-width: 1024px) {
+  .side-by-side-row {
+    flex-direction: column;
+    gap: 50px;
+  }
+}
+
+
+.header-description {
+  font-size: 16px;
+  font-weight: 5;
+  color: #4c4c52;
+  line-height: 1.6;
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 18px 24px;
+  
+  background: #ffffffb6;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+   
+  border-top: 6px solid #0984e3; 
+  transition: all 0.3s ease;
+}
+
+.header-description:hover {
+  background: #eef2f7;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}

@@ -1,0 +1,145 @@
+/* Container that pushes content to the right */
+.salary-right-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;   /* center whole section */
+  margin-top: 200px;     
+}
+
+.salary-container {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Center Hub for White Background */
+.center-hub {
+  position: relative;
+  width: 195px;
+  height: 195px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 10px 40px rgba(52, 48, 129, 0.596); /* Soft shadow for elevation */
+  border: 7px solid #f7f9dcbf;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.hub-text {
+  text-align: center;
+  color: #2f3542;
+}
+
+.hub-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #272827;
+  letter-spacing: 1px;
+}
+
+.hub-divider {
+  width: 150px;
+  height: 1.5px;
+  background: #0918e3;
+  margin: 8px auto;
+}
+
+.hub-number {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #1e272e;
+  line-height: 1;
+}
+
+.hub-label {
+  font-size: 0.65em;
+  color: #2b2b2c;
+  text-transform: uppercase;
+}
+
+/* Nodes Styling */
+.salary-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+}
+
+.node-circle {
+  width: 80px;
+  height: 60px;
+  background: #ffffff;
+  border: 2px solid; /* Color from style prop */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(146, 145, 145, 0.534);
+}
+
+.node-val {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.node-text {
+  margin-top: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1e2f4d;
+  background: #dddfe251;
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 0.5px solid #101452b8;
+  white-space: nowrap;
+}
+
+.salary-highlight{
+  max-width: 420px;
+  margin-left: 200px;
+  margin-top: 150px;
+  align-self: flex-start;
+
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: #2d3436;
+
+  padding: 20px 24px;
+
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border-radius: 14px;  
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+
+  border: 1px solid #cfd2d7;
+  border-left: 6px solid #0984e3; 
+  transition: all 0.3s ease;
+}
+
+.salary-highlight:hover{
+  border-color: #2417d7;
+}
+
+.highlight-title{
+  font-size: 14px;
+  font-weight: 700;
+  color: #0984e3;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.salary-section{
+  display: flex;
+  justify-content: center;   /* centers both together */
+  align-items: center;
+  
+}
