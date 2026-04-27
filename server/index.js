@@ -21,6 +21,8 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+const placementStatsRoutes = require("./routes/placementStats");
+
 // Middleware
 app.use(helmet());
 app.use(cors({
@@ -31,6 +33,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(generalLimiter);
+
+app.use("/api/public/placement-stats", placementStatsRoutes);
 
 // Routes
 app.use('/uploads', express.static(require('path').join(__dirname, 'uploads')));
