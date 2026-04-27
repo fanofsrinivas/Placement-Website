@@ -313,49 +313,207 @@
 }
 
 /* Contact */
-.contactGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 20px;
+.container {
+  padding: 80px 8%;
+  background: linear-gradient(135deg, #f0f4ff, #ffffff);
+  font-family: 'Inter', sans-serif;
 }
 
-.contactInfo {
-    display: flex;
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.header h1 {
+  font-size: 40px;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+.header p {
+  color: #64748b;
+}
+
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: stretch;
+}
+
+/* INFO */
+.infoBox {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.infoItem {
+  display: flex;
+  gap: 15px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* FORM */
+.formBox {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.formBox input,
+.formBox textarea {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+.formBox button {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+}
+
+/* REACH */
+.reachSection {
+  margin-top: 80px;
+  text-align: center;
+}
+.reachGrid {
+  display: flex;
+  gap: 20px;
+}
+.reachCard {
+  flex: 1;
+  padding: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+/* PROFILE + MAP */
+.locationWrapper {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px;
+  margin-top: 80px;
+}
+
+/* PROFILE */
+.profileBox {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  text-align: center;
+}
+.profileImg {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid #2563eb;
+}
+.role {
+  color: #2563eb;
+  font-weight: 600;
+}
+.contactDetails {
+  margin-top: 15px;
+}
+.addressBox {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 12px;
+  text-align: left;
+}
+
+/* MAP */
+/* MAP CARD (outer box) */
+.mapCard {
+  background: white;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* TITLE */
+.mapTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+/* INNER MAP BOX */
+.mapBox {
+  width: 100%;
+  height: 350px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+/* IFRAME */
+.mapBox iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+/* CTA */
+.cta {
+  margin-top: 80px;
+  padding: 60px 20px;
+  text-align: center;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px; 
+}
+
+.ctaButtons a {
+  margin: 10px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.primary {
+  background: white;
+  color: #1e3a8a;
+}
+.outline {
+  border: 2px solid white;
+  color: white;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .grid,
+  .locationWrapper {
+    grid-template-columns: 1fr;
+  }
+  .reachGrid {
     flex-direction: column;
-    gap: 24px;
+  }
 }
 
-.contactItem {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-}
-
-.contactIcon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: #e8eaf6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.contactItem h4 {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.contactItem p {
-    font-size: 14px;
-    color: var(--text-secondary);
-}
 
 /* About Page */
 .aboutContent {
