@@ -4,6 +4,9 @@ import { api } from '../../context/AuthContext';
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
 import styles from '../Dashboard.module.css';
 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 const UserVerification = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,6 +24,41 @@ const UserVerification = () => {
         } catch { } finally { setLoading(false); }
     };
 
+ const handleDownloadExcel = () => {
+        if (!users.length) {
+            toast.error("No data to export");
+            return;
+        }
+
+        const exportData = users.map(u => ({
+            Email: u.email,
+            Role: u.role,
+            Name:
+                u.role === 'student'
+                    ? `${u.studentProfile?.firstName || ''} ${u.studentProfile?.lastName || ''}`
+                    : u.companyProfile?.companyName || '',
+            Branch: u.studentProfile?.branch || '',
+            CGPA: u.studentProfile?.cgpa || '',
+            Roll: u.studentProfile?.rollNumber || '',
+            Industry: u.companyProfile?.industry || '',
+            Website: u.companyProfile?.website || '',
+            EmailVerified: u.isEmailVerified ? 'Yes' : 'No'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+        const blob = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        saveAs(blob, `users_${roleFilter || 'all'}_${search || 'all'}.xlsx`);
+    }; 
+    
+    
     useEffect(() => { fetchUsers(); }, [page, roleFilter, search]);
 
     const handleAction = async (id, action, reason = '') => {
@@ -41,13 +79,27 @@ const UserVerification = () => {
             </div>
 
             <div className={styles.filters}>
-                <input placeholder="Search by name or email..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
-                <select value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }}>
-                    <option value="">All Roles</option>
-                    <option value="student">Students</option>
-                    <option value="company">Companies</option>
-                </select>
+                    <input 
+                        placeholder="Search by name or email..." 
+                        value={search} 
+                        onChange={e => { setSearch(e.target.value); setPage(1); }} 
+                    />
+
+                    <select 
+                        value={roleFilter} 
+                        onChange={e => { setRoleFilter(e.target.value); setPage(1); }}
+                    >
+                        <option value="">All Roles</option>
+                        <option value="student">Students</option>
+                        <option value="company">Companies</option>
+                    </select>
+
+                 
+                    <button className="btn btn-primary" onClick={handleDownloadExcel}>
+                        Download Excel
+                    </button>
             </div>
+
 
             {loading ? <LoadingSkeleton /> : (
                 <div className="table-container">
