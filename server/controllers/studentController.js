@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
 const AuditLog = require('../models/AuditLog');
+const { branchMatches } = require('../utils/branchMapping');
 const { cloudinary } = require('../config/cloudinary');
 
 // @desc    Get student profile
@@ -123,7 +124,7 @@ exports.browseJobs = async (req, res) => {
             if (j.eligibility.maxBacklogs !== undefined && sp.activeBacklogs > j.eligibility.maxBacklogs) {
                 reasons.push(`Maximum backlogs allowed: ${j.eligibility.maxBacklogs}. Your backlogs: ${sp.activeBacklogs}`);
             }
-            if (j.eligibility.branches?.length > 0 && !j.eligibility.branches.includes(sp.branch)) {
+            if (j.eligibility.branches?.length > 0 && !branchMatches(sp.branch, j.eligibility.branches)) {
                 reasons.push(`Your branch (${sp.branch}) is not eligible.`);
             }
             if (j.eligibility.degrees?.length > 0 && !j.eligibility.degrees.includes(sp.degree)) {
@@ -171,7 +172,7 @@ exports.applyToJob = async (req, res) => {
         if (job.eligibility.maxBacklogs !== undefined && sp.activeBacklogs > job.eligibility.maxBacklogs) {
             reasons.push(`Maximum backlogs allowed: ${job.eligibility.maxBacklogs}. Your backlogs: ${sp.activeBacklogs}`);
         }
-        if (job.eligibility.branches?.length > 0 && !job.eligibility.branches.includes(sp.branch)) {
+        if (job.eligibility.branches?.length > 0 && !branchMatches(sp.branch, job.eligibility.branches)) {
             reasons.push(`Your branch (${sp.branch}) is not eligible.`);
         }
 

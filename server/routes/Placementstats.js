@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { getPlacementStats } = require("../controllers/placementStatsController");
+const { getPlacementStats } = require("../controllers/placementstatsControl");
 
 router.get("/:year", getPlacementStats);
 

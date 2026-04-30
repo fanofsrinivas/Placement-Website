@@ -1,11 +1,31 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../../context/AuthContext';
+
+const SERVER_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api$/, '');
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
 import styles from '../Dashboard.module.css';
 
-const branches = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'CHE', 'MME', 'BT', 'PHY', 'CHEM', 'MATH', 'MSE', 'Other'];
-const degrees = ['B.Tech', 'M.Tech', 'MSc', 'MCA', 'PhD'];
+const branches = [
+    'Civil Engineering',
+    'Electrical Engineering',
+    'Mechanical Engineering',
+    'Electronics and Communication Engineering',
+    'Metallurgical and Materials Engineering',
+    'Chemical Engineering',
+    'Computer Science and Engineering',
+    'Biotechnology',
+    'Electronics and Communication Engineering (VLSI Design and Technology)',
+    'Mathematics and Computing',
+    'Computer Science and Engineering (Artificial Intelligence & Data Science)',
+    'Integrated M.Sc. Mathematics',
+    'Integrated M.Sc. Physics',
+    'Integrated M.Sc. Chemistry',
+    'Dual Degree - Chemical Engineering',
+    'Dual Degree - Metallurgical and Materials Engineering',
+    'Other',
+];
+const degrees = ['B.Tech', 'M.Tech', 'MSc', 'MCA', 'PhD', 'Dual Degree', 'Integrated MSc'];
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
@@ -148,7 +168,7 @@ const Profile = () => {
                     <h2>Resume</h2>
                     {form.resumeUrl && (
                         <p style={{ marginBottom: 12 }}>
-                            Current: <a href={form.resumeUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                            Current: <a href={`${SERVER_URL}${form.resumeUrl}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 600 }}>
                                 View Resume ↗
                             </a>
                         </p>

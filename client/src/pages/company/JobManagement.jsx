@@ -4,7 +4,17 @@ import { api } from '../../context/AuthContext';
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
 import styles from '../Dashboard.module.css';
 
-const branches = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'CHE', 'MME', 'BT', 'PHY', 'CHEM', 'MATH', 'MSE'];
+const branches = [
+    'Civil Engineering', 'Electrical Engineering', 'Mechanical Engineering',
+    'Electronics and Communication Engineering', 'Metallurgical and Materials Engineering',
+    'Chemical Engineering', 'Computer Science and Engineering', 'Biotechnology',
+    'Electronics and Communication Engineering (VLSI Design and Technology)',
+    'Mathematics and Computing',
+    'Computer Science and Engineering (Artificial Intelligence & Data Science)',
+    'Integrated M.Sc. Mathematics', 'Integrated M.Sc. Physics', 'Integrated M.Sc. Chemistry',
+    'Dual Degree - Chemical Engineering', 'Dual Degree - Metallurgical and Materials Engineering',
+    'Other',
+];
 const jobTypes = ['Full-Time', 'Internship', '6-Month Internship + FTE', 'PPO'];
 
 const emptyJob = {
